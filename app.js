@@ -4,7 +4,8 @@ const app = express()
 const calcularIMC = require('./imc')
 const port = 3000
 app.use(express.json())
-
+const cors = require('cors');
+app.use(cors());
 
 app.get('/', (req, res) => {
   res.send('Hello World!')
@@ -51,26 +52,26 @@ app.get('/paciente/:id', async (req, res) => {
   }
 })
 
-app.post('/paciente',async(req,res)=>{
-  const {nome,idade,altura,peso}=req.body;
-  if(!nome||!idade||!altura||!peso){
-      return res.status(400).json({
-        mensagem: "Verifique se todos os campos estão preenchidos",
-        detalhes: error.message
-      });
+app.post('/paciente', async (req, res) => {
+  const { nome, idade, altura, peso } = req.body;
+  if (!nome || !idade || !altura || !peso) {
+    return res.status(400).json({
+      mensagem: "Verifique se todos os campos estão preenchidos",
+      detalhes: error.message
+    });
   }
-  const {imc,status}=calcularIMC(Number(peso),Number(altura));
+  const { imc, status } = calcularIMC(Number(peso), Number(altura));
   try {
-      const [rows] = await db.execute('INSERT INTO `pacientes` (`nome`, `idade`, `altura`, `peso`, `imc`, `status`) VALUES (?,?,?,?,?,?);', [nome,idade,altura,peso,imc,status]);
-      res.status(201).json({
-        id:rows.insertId,
-        nome,
-        idade,
-        altura,
-        peso,
-        imc,
-        status
-      });
+    const [rows] = await db.execute('INSERT INTO `pacientes` (`nome`, `idade`, `altura`, `peso`, `imc`, `status`) VALUES (?,?,?,?,?,?);', [nome, idade, altura, peso, imc, status]);
+    res.status(201).json({
+      id: rows.insertId,
+      nome,
+      idade,
+      altura,
+      peso,
+      imc,
+      status
+    });
   } catch (error) {
     res.status(500).json({
       mensagem: "Erro Interno do Servidor",
@@ -78,20 +79,21 @@ app.post('/paciente',async(req,res)=>{
     });
   }
 })
-app.put('/paciente/:id',async(req,res)=>{
+app.put('/paciente/:id', async (req, res) => {
   const { id } = req.params;
-  const {nome,idade,altura,peso}=req.body;
-  if(!nome||!idade||!altura||!peso||!id){
-      return res.status(400).json({
-        mensagem: "Verifique se todos os campos estão preenchidos",
-        detalhes: error.message
-      });
+  const { nome, idade, altura, peso } = req.body;
+  if (!nome || !idade || !altura || !peso || !id) {
+    return res.status(400).json({
+      mensagem: "Verifique se todos os campos estão preenchidos",
+      detalhes: error.message
+    });
   }
-  const {imc,status}=calcularIMC(Number(peso),Number(altura));
+  const { imc, status } = calcularIMC(Number(peso), Number(altura));
   try {
-      const [rows] = await db.execute('UPDATE `pacientes` SET `nome` = ?, `idade` = ?, `altura` = ?, `peso` = ?, `imc` = ?, `status` = ? WHERE `pacientes`.`id` = ?;', [nome,idade,altura,peso,imc,status,id]);
-      res.status(200).json({mensagem:"Paciente atualizado com sucesso."  
-      });
+    const [rows] = await db.execute('UPDATE `pacientes` SET `nome` = ?, `idade` = ?, `altura` = ?, `peso` = ?, `imc` = ?, `status` = ? WHERE `pacientes`.`id` = ?;', [nome, idade, altura, peso, imc, status, id]);
+    res.status(200).json({
+      mensagem: "Paciente atualizado com sucesso."
+    });
   } catch (error) {
     res.status(500).json({
       mensagem: "Erro Interno do Servidor",
@@ -111,7 +113,7 @@ app.delete('/paciente/:id', async (req, res) => {
         detalhes: error.message
       });
     }
-    res.status(200).json({mensagem:"Paciente apagado com sucesso"});
+    res.status(200).json({ mensagem: "Paciente apagado com sucesso" });
   } catch (error) {
     res.status(500).json({
       mensagem: "Erro Interno do Servidor",
